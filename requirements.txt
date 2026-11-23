@@ -1,0 +1,19 @@
+# Datos
+requests
+xarray
+netCDF4
+numpy
+pandas
+rasterio
+copernicusmarine
+cdsapi
+# Exploración
+matplotlib
+cartopy
+jupyterlab
+# Modelos (instalar torch según tu GPU: https://pytorch.org/get-started/locally/)
+torch
+torchvision
+segmentation-models-pytorch
+# Baseline físico
+opendrift

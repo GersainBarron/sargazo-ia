@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sargazo IA · Caribe 2025</title>
+<meta name="author" content="Gersain Barrón">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Mundo único (carta náutica nocturna): lienzo 3D a pantalla completa, panel lateral de control y barra de tiempo abajo. */
+:root {
+  --mar: #061724;
+  --panel: #0c2333;
+  --linea: #1d3d52;
+  --texto: #e4edf1;
+  --tenue: #8ea8b6;
+  --sargazo: #d9a032;
+  --turquesa: #45c4c8;
+  --ok: #4fb47c; --medio: #e6c04a; --alto: #e2643f;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --cuerpo: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: var(--mar); color: var(--texto); font: 15px/1.45 var(--cuerpo); }
+body { display: grid; grid-template-columns: 1fr 340px; grid-template-rows: 1fr auto; overflow: hidden; }
+#escena { position: relative; grid-row: 1; grid-column: 1; min-height: 0; }
+#escena canvas { display: block; width: 100%; height: 100%; }
+#panel { grid-row: 1 / span 2; grid-column: 2; background: var(--panel); border-left: 1px solid var(--linea); overflow-y: auto; padding: 18px 18px 24px; display: flex; flex-direction: column; gap: 18px; }
+#tiempo { grid-row: 2; grid-column: 1; background: color-mix(in srgb, var(--panel) 92%, black); border-top: 1px solid var(--linea); padding: 10px 16px 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 6px 14px; align-items: center; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; line-height: 1.05; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--tenue); font-weight: 600; }
+p { margin: 0; }
+.sub { color: var(--tenue); font-size: 14px; }
+.grupo { display: flex; flex-direction: column; gap: 10px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--mar); border: 1px solid var(--linea); border-radius: 8px; padding: 4px; }
+.seg button { font: 600 14px var(--cuerpo); color: var(--tenue); background: transparent; border: 0; border-radius: 6px; padding: 7px 6px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--linea); color: var(--texto); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--turquesa); outline-offset: 2px; }
+.capas { display: flex; flex-direction: column; gap: 6px; }
+.capas label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.capas input { accent-color: var(--turquesa); width: 16px; height: 16px; }
+.muestra { width: 22px; height: 10px; border-radius: 3px; flex: none; }
+.fecha-grande { font: 600 26px/1 var(--display); letter-spacing: .03em; }
+.fecha-nota { font-size: 13px; color: var(--tenue); }
+.tramo { display: grid; grid-template-columns: 10px 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px; background: var(--mar); border: 1px solid var(--linea); border-radius: 8px; }
+.tramo .luz { width: 10px; height: 10px; border-radius: 50%; }
+.tramo .nombre { font-weight: 600; font-size: 14px; }
+.tramo .prob { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; }
+.tramo .detalle { grid-column: 2 / span 2; font-size: 12.5px; color: var(--tenue); }
+.barra { grid-column: 2 / span 2; height: 4px; background: var(--linea); border-radius: 2px; overflow: hidden; }
+.barra i { display: block; height: 100%; }
+.metricas { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; }
+.metricas .v { font: 500 14px var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.metricas .gana { color: var(--sargazo); }
+.pasos { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--texto); }
+.pasos b { color: var(--sargazo); font-weight: 600; }
+.nota { font-size: 12.5px; color: var(--tenue); border-left: 2px solid var(--linea); padding-left: 10px; }
+.pie { font-size: 12px; color: var(--tenue); display: flex; flex-direction: column; gap: 4px; }
+.pie a { color: var(--turquesa); }
+#play { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--linea); background: var(--sargazo); color: #1a1205; font-size: 16px; cursor: pointer; display: grid; place-items: center; }
+#rango { width: 100%; accent-color: var(--sargazo); }
+#velocidad { display: flex; gap: 4px; }
+#velocidad button { font: 500 12px var(--mono); color: var(--tenue); background: var(--mar); border: 1px solid var(--linea); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
+#velocidad button[aria-pressed="true"] { color: var(--texto); border-color: var(--sargazo); }
+.meses { grid-column: 2; display: flex; justify-content: space-between; font: 400 11px var(--mono); color: var(--tenue); margin-top: -4px; }
+#titulo-mapa { position: absolute; left: 16px; top: 14px; display: flex; flex-direction: column; gap: 2px; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+#titulo-mapa .modo { font: 600 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--sargazo); }
+#vistas { position: absolute; right: 14px; top: 14px; display: flex; gap: 6px; }
+#vistas button, #idioma { font: 600 13px var(--cuerpo); color: var(--texto); background: rgba(6,23,36,.72); border: 1px solid var(--linea); border-radius: 6px; padding: 6px 10px; cursor: pointer; backdrop-filter: blur(4px); }
+.etiqueta { position: absolute; transform: translate(-100%, -50%); font: 600 12px var(--cuerpo); color: var(--texto); background: rgba(6,23,36,.78); border: 1px solid var(--linea); border-left: 3px solid var(--tenue); border-radius: 4px; padding: 2px 7px; white-space: nowrap; pointer-events: none; }
+#leyenda { position: absolute; left: 16px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--texto); background: rgba(6,23,36,.7); border: 1px solid var(--linea); border-radius: 8px; padding: 7px 10px; max-width: calc(100% - 32px); }
+#leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+#cargando { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mar); font: 600 18px var(--display); letter-spacing: .1em; color: var(--tenue); }
+#cargando.oculto { display: none; }
+.cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+@media (max-width: 820px) {
+  html, body { height: auto; }
+  body { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow-y: auto; min-height: 100%; }
+  #escena { grid-row: 1; grid-column: 1; height: 62vh; }
+  #tiempo { grid-row: 2; grid-column: 1; }
+  #panel { grid-row: 3; grid-column: 1; border-left: 0; border-top: 1px solid var(--linea); }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<main id="escena" aria-label="Mapa 3D del Caribe mexicano con sargazo">
+  <div id="titulo-mapa">
+    <span class="modo" id="t-modo">Verificación del pronóstico</span>
+    <span class="fecha-grande" id="t-fecha">—</span>
+  </div>
+  <div id="vistas">
+    <button id="v-caribe" type="button">Caribe</button>
+    <button id="v-qroo" type="button">Quintana Roo</button>
+    <button id="v-costa" type="button">Costa</button>
+  </div>
+  <div id="leyenda">
+    <span><i class="muestra" style="background:var(--sargazo)"></i><b data-i="ley-obs">Sargazo observado (satélite)</b></span>
+    <span><i class="muestra" style="background:linear-gradient(90deg,#f3d35a,#e2643f)"></i><b data-i="ley-pred">Probabilidad predicha</b></span>
+    <span><i class="muestra" style="background:#dfe9ee;height:2px"></i><b data-i="ley-cor">Corrientes</b></span>
+  </div>
+  <div id="cargando">CARGANDO DATOS…</div>
+</main>
+
+<section id="tiempo" aria-label="Línea de tiempo">
+  <button id="play" type="button" aria-label="Pausar">❚❚</button>
+  <input id="rango" type="range" min="0" max="174" step="1" value="0" aria-label="Fecha">
+  <div id="velocidad" role="group" aria-label="Velocidad">
+    <button type="button" data-v="1">1 d/s</button>
+    <button type="button" data-v="3" aria-pressed="true">3 d/s</button>
+    <button type="button" data-v="7">7 d/s</button>
+  </div>
+  <div class="meses" id="meses"></div>
+</section>
+
+<aside id="panel">
+  <div class="cabecera">
+    <div class="grupo">
+      <h1 data-i="titulo">Sargazo IA · Caribe mexicano</h1>
+      <p class="sub" data-i="sub">Temporada 2025 vista desde el satélite y pronóstico a 7 días con redes neuronales.</p>
+    </div>
+    <button id="idioma" type="button" aria-label="Cambiar idioma">EN</button>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-modo">Modo</h2>
+    <div class="seg" role="group">
+      <button type="button" id="m-verif" aria-pressed="true" data-i="m-verif">Verificar</button>
+      <button type="button" id="m-pron" aria-pressed="false" data-i="m-pron">Pronosticar +7 d</button>
+    </div>
+    <p class="fecha-nota" id="nota-modo"></p>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-capas">Capas</h2>
+    <div class="capas">
+      <label><input type="checkbox" id="c-obs" checked><span class="muestra" style="background:var(--sargazo)"></span><span data-i="c-obs">Sargazo observado</span></label>
+      <label><input type="checkbox" id="c-pred" checked><span class="muestra" style="background:linear-gradient(90deg,#f3d35a,#e2643f)"></span><span data-i="c-pred">Predicción de la red</span></label>
+      <label><input type="checkbox" id="c-cor" checked><span class="muestra" style="background:#dfe9ee;height:2px"></span><span data-i="c-cor">Corrientes</span></label>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-tramos">Riesgo de arribo por tramo</h2>
+    <div id="tramos" class="grupo"></div>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-dia">Este día</h2>
+    <div class="metricas" id="m-dia"></div>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-temp">Toda la temporada 2025</h2>
+    <div class="metricas" id="m-temp"></div>
+  </div>
+
+  <div class="grupo">
+    <h2 data-i="h-como">Cómo funciona</h2>
+    <ol class="pasos" id="pasos"></ol>
+    <p class="nota" id="limites"></p>
+  </div>
+
+  <div class="pie">
+    <span><b>Gersain Barrón</b> · <a href="https://gersadesign.com">gersadesign.com</a></span>
+    <span data-i="fuentes">Datos: NOAA/USF (AFAI), Copernicus Marine, ERA5, MARIDA.</span>
+    <span data-i="aviso">Propuesta independiente con datos abiertos; no es un producto oficial.</span>
+  </div>
+</aside>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// ------------------------------------------------------------------ textos
+const TXT = {
+  es: {
+    titulo: "Sargazo IA · Caribe mexicano", sub: "Temporada 2025 vista desde el satélite y pronóstico a 7 días con redes neuronales.",
+    "h-modo": "Modo", "m-verif": "Verificar", "m-pron": "Pronosticar +7 d", "h-capas": "Capas",
+    "c-obs": "Sargazo observado", "c-pred": "Predicción de la red", "c-cor": "Corrientes",
+    "h-tramos": "Riesgo de arribo por tramo", "h-dia": "Este día", "h-temp": "Toda la temporada 2025", "h-como": "Cómo funciona",
+    "ley-obs": "Sargazo observado (satélite)", "ley-pred": "Probabilidad predicha", "ley-cor": "Corrientes",
+    fuentes: "Datos: NOAA/USF (AFAI), Copernicus Marine, ERA5, MARIDA.",
+    aviso: "Propuesta independiente con datos abiertos; no es un producto oficial.",
+    modoVerif: "Verificación del pronóstico", modoPron: "Pronóstico a 7 días",
+    notaVerif: (e, o) => `La mancha de color es lo que la red pronosticó el ${e} para el ${o}. Los puntos dorados son lo que el satélite vio ese día.`,
+    notaPron: (h, o) => `Con los datos del ${h}, la red pronostica el sargazo para el ${o}.`,
+    sinPred: "Sin pronóstico para esta fecha (inicio de temporada o día con datos atípicos).",
+    bajo: "bajo", medio: "medio", alto: "alto", observado: "Observado", si: "sí", no: "no", cobertura: "cobertura",
+    iouModelo: "Acierto de la red (IoU)", iouPers: "Si se asume que no cambia", emitido: "Pronóstico emitido",
+    tRed: "Red neuronal ConvLSTM", tPers: "Persistencia (no cambia)", tLag: "Física simple (partículas)",
+    tIou: "Acierto de ubicación (IoU, prueba 2025)", tUnet: "Detector U-Net (F1, MARIDA)",
+    pasos: [
+      "<b>Satélite.</b> Índice AFAI de NOAA/USF: dónde flota algo dorado en el mar, cada día, a 1.6 km.",
+      "<b>Detección.</b> Una U-Net entrenada con imágenes Sentinel-2 etiquetadas separa el sargazo de espuma, barcos y aguas turbias.",
+      "<b>Pronóstico.</b> Una ConvLSTM lee 7 días de sargazo, corrientes (Copernicus) y viento (ERA5) y estima la probabilidad de sargazo 7 días después.",
+      "<b>Prueba honesta.</b> Se entrenó con 2019–2023, se ajustó con 2024 y se evalúa en 2025, temporada que nunca vio.",
+    ],
+    limites: "Límites: la red mejora a los métodos de referencia, pero la señal satelital tiene ruido y en 2025 hubo sargazo casi siempre frente a la costa. Siguiente fase: mapas más limpios con imágenes Sentinel y niveles de intensidad por playa validados con registros de recolección.",
+    vistas: ["Caribe", "Quintana Roo", "Costa"], cargando: "CARGANDO DATOS…", pausa: "Pausar", reproducir: "Reproducir",
+  },
+  en: {
+    titulo: "Sargassum AI · Mexican Caribbean", sub: "The 2025 season seen from space, with a 7-day neural-network forecast.",
+    "h-modo": "Mode", "m-verif": "Verify", "m-pron": "Forecast +7 d", "h-capas": "Layers",
+    "c-obs": "Observed sargassum", "c-pred": "Network forecast", "c-cor": "Currents",
+    "h-tramos": "Landfall risk by coastal stretch", "h-dia": "This day", "h-temp": "Whole 2025 season", "h-como": "How it works",
+    "ley-obs": "Observed sargassum (satellite)", "ley-pred": "Forecast probability", "ley-cor": "Currents",
+    fuentes: "Data: NOAA/USF (AFAI), Copernicus Marine, ERA5, MARIDA.",
+    aviso: "Independent proposal built on open data; not an official product.",
+    modoVerif: "Forecast verification", modoPron: "7-day forecast",
+    notaVerif: (e, o) => `The colored area is what the network forecast on ${e} for ${o}. Golden dots are what the satellite saw that day.`,
+    notaPron: (h, o) => `Using data up to ${h}, the network forecasts sargassum for ${o}.`,
+    sinPred: "No forecast for this date (season start or a day with outlier data).",
+    bajo: "low", medio: "medium", alto: "high", observado: "Observed", si: "yes", no: "no", cobertura: "coverage",
+    iouModelo: "Network accuracy (IoU)", iouPers: "Assuming no change", emitido: "Forecast issued",
+    tRed: "ConvLSTM network", tPers: "Persistence (no change)", tLag: "Simple physics (particles)",
+    tIou: "Location accuracy (IoU, 2025 test)", tUnet: "U-Net detector (F1, MARIDA)",
+    pasos: [
+      "<b>Satellite.</b> NOAA/USF AFAI index: where something golden floats at sea, every day, at 1.6 km.",
+      "<b>Detection.</b> A U-Net trained on labeled Sentinel-2 images separates sargassum from foam, ships and turbid water.",
+      "<b>Forecast.</b> A ConvLSTM reads 7 days of sargassum, currents (Copernicus) and wind (ERA5) and estimates the probability of sargassum 7 days later.",
+      "<b>Honest test.</b> Trained on 2019–2023, tuned on 2024, evaluated on 2025, a season it never saw.",
+    ],
+    limites: "Limits: the network beats the reference methods, but the satellite signal is noisy and in 2025 sargassum was almost always present off the coast. Next phase: cleaner maps from Sentinel imagery and per-beach intensity levels validated with cleanup records.",
+    vistas: ["Caribbean", "Quintana Roo", "Coast"], cargando: "LOADING DATA…", pausa: "Pause", reproducir: "Play",
+  },
+};
+let idioma = "es";
+const tx = (k) => TXT[idioma][k];
+
+// ------------------------------------------------------------------ utilidades de datos
+const cargarImg = async (src) => {
+  const r = await fetch(src);
+  const b = await r.blob();
+  return createImageBitmap(b, { premultiplyAlpha: "none", colorSpaceConversion: "none" });
+};
+const pixeles = (im) => {
+  const c = document.createElement("canvas"); c.width = im.width; c.height = im.height;
+  const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
+  return g.getImageData(0, 0, im.width, im.height).data;
+};
+// Extrae mosaicos del atlas y voltea filas (fila 0 = sur) para que v = latitud
+function capas(px, anchoImg, w, h, cols, n, canales) {
+  const out = new Uint8Array(n * w * h * canales.length);
+  for (let i = 0; i < n; i++) {
+    const cx = (i % cols) * w, cy = Math.floor(i / cols) * h;
+    for (let y = 0; y < h; y++) {
+      const sy = cy + (h - 1 - y);
+      for (let x = 0; x < w; x++) {
+        const s = (sy * anchoImg + cx + x) * 4, d = ((i * h + y) * w + x) * canales.length;
+        for (let c = 0; c < canales.length; c++) out[d + c] = px[s + canales[c]];
+      }
+    }
+  }
+  return out;
+}
+function texArray(datos, w, h, n, formato) {
+  const t = new THREE.DataArrayTexture(datos, w, h, n);
+  t.format = formato; t.type = THREE.UnsignedByteType; t.unpackAlignment = 1;
+  t.minFilter = THREE.LinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
+  return t;
+}
+
+const [meta, imObs, imPred, imCorr, imTierra] = await Promise.all([
+  fetch("data/meta.json").then((r) => r.json()),
+  cargarImg("data/obs.png"), cargarImg("data/pred.png"), cargarImg("data/corr.png"), cargarImg("data/tierra.png"),
+]);
+const N = meta.atlas.n, [H, W] = meta.rejilla, [HC, WC] = meta.rejilla_corr, COLS = meta.atlas.columnas;
+const fechas = meta.fechas;
+const idxFecha = Object.fromEntries(fechas.map((f, i) => [f, i]));
+const obsDatos = capas(pixeles(imObs), imObs.width, W, H, COLS, N, [0]);
+const predDatos = capas(pixeles(imPred), imPred.width, W, H, COLS, N, [0]);
+const corrDatos = capas(pixeles(imCorr), imCorr.width, WC, HC, COLS, N, [0, 1]);
+const TT = meta.tierra_px[0];
+const tierraPx = capas(pixeles(imTierra), imTierra.width, TT, TT, 1, 1, [0, 1, 2, 0]);
+for (let i = 3; i < tierraPx.length; i += 4) tierraPx[i] = 255;
+
+const texObs = texArray(obsDatos, W, H, N, THREE.RedFormat);
+const texPred = texArray(predDatos, W, H, N, THREE.RedFormat);
+const texCorr = texArray(corrDatos, WC, HC, N, THREE.RGFormat);
+const texTierra = new THREE.DataTexture(tierraPx, TT, TT, THREE.RGBAFormat);
+texTierra.magFilter = THREE.LinearFilter; texTierra.minFilter = THREE.LinearMipmapLinearFilter;
+texTierra.generateMipmaps = true; texTierra.unpackAlignment = 1; texTierra.needsUpdate = true;
+
+// ------------------------------------------------------------------ escena
+const contenedor = document.getElementById("escena");
+const render = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+render.setPixelRatio(Math.min(devicePixelRatio, 2));
+render.toneMapping = THREE.ACESFilmicToneMapping; render.toneMappingExposure = 1.05;
+contenedor.prepend(render.domElement);
+const escena = new THREE.Scene();
+const HORIZONTE = new THREE.Color("#7fa3b8");
+escena.background = new THREE.Color("#0b2233");
+escena.fog = new THREE.Fog(HORIZONTE, 140, 420);
+const camara = new THREE.PerspectiveCamera(42, 1, 0.1, 2000);
+const controles = new OrbitControls(camara, render.domElement);
+controles.enableDamping = true; controles.maxPolarAngle = Math.PI * 0.47; controles.minDistance = 6; controles.maxDistance = 260;
+
+const ANCHO = 100 * Math.cos(19 * Math.PI / 180), ALTO = 100;     // 10° × 10°
+const SOL = new THREE.Vector3(-0.45, 0.62, 0.64).normalize();
+const lon2x = (lon) => ((lon - meta.lon[0]) / (meta.lon[1] - meta.lon[0]) - 0.5) * ANCHO;
+const lat2z = (lat) => (0.5 - (lat - meta.lat[0]) / (meta.lat[1] - meta.lat[0])) * ALTO;
+
+// Cielo: domo con degradado
+{
+  const g = new THREE.SphereGeometry(900, 32, 16);
+  const m = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { sol: { value: SOL } },
+    vertexShader: `varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `uniform vec3 sol; varying vec3 vD;
+      void main(){ float h = clamp(vD.y,0.,1.);
+        vec3 c = mix(vec3(.50,.64,.72), vec3(.10,.27,.45), pow(h,.55));
+        c += vec3(1.,.82,.55)*pow(max(dot(vD,sol),0.),48.)*.9 + vec3(1.,.9,.7)*pow(max(dot(vD,sol),0.),4.)*.12;
+        gl_FragColor = vec4(c,1.); }`,
+  });
+  escena.add(new THREE.Mesh(g, m));
+}
+
+const uTiempo = { value: 0 };
+
+// Océano
+const oceano = new THREE.Mesh(
+  new THREE.PlaneGeometry(1600, 1600, 1, 1).rotateX(-Math.PI / 2),
+  new THREE.ShaderMaterial({
+    uniforms: { tierra: { value: texTierra }, tiempo: uTiempo, sol: { value: SOL }, ancho: { value: ANCHO }, alto: { value: ALTO },
+      horizonte: { value: HORIZONTE } },
+    vertexShader: `varying vec3 vP; void main(){ vec4 w = modelMatrix*vec4(position,1.); vP = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }`,
+    fragmentShader: `
+      uniform sampler2D tierra; uniform float tiempo, ancho, alto; uniform vec3 sol, horizonte; varying vec3 vP;
+      vec3 olas(vec2 p){
+        vec2 d[6] = vec2[6](vec2(1.,.2),vec2(.7,.7),vec2(-.3,1.),vec2(.9,-.45),vec2(-.8,.55),vec2(.15,-1.));
+        float f[6] = float[6](1.7,2.6,3.9,5.3,7.9,11.);
+        vec2 g = vec2(0.);
+        for(int i=0;i<6;i++){ vec2 di = normalize(d[i]); float a = .045/f[i]*2.6;
+          float ph = dot(di,p)*f[i] + tiempo*(1.2+.25*float(i));
+          g += di*f[i]*a*cos(ph); }
+        return normalize(vec3(-g.x, 1., -g.y));
+      }
+      void main(){
+        vec2 uv = vec2(vP.x/ancho + .5, .5 - vP.z/alto);
+        float dentro = step(0.,uv.x)*step(uv.x,1.)*step(0.,uv.y)*step(uv.y,1.);
+        float dist = mix(1., texture2D(tierra, uv).g, dentro);
+        float somero = 1. - smoothstep(.0, .22, dist);
+        float dcam = length(cameraPosition - vP);
+        vec3 n = normalize(mix(olas(vP.xz*.9), vec3(0.,1.,0.), smoothstep(25., 110., dcam)*.85));
+        vec3 v = normalize(cameraPosition - vP);
+        float fres = .02 + .98*pow(1. - max(dot(n,v),0.), 5.);
+        vec3 profundo = vec3(.015,.10,.20), turq = vec3(.07,.52,.56);
+        vec3 base = mix(profundo, turq, somero*.85);
+        vec3 r = reflect(-v, n);
+        vec3 cielo = mix(vec3(.45,.6,.7), vec3(.12,.28,.45), clamp(r.y,0.,1.));
+        vec3 c = mix(base, cielo, fres*.75);
+        c += vec3(1.,.9,.7) * pow(max(dot(r, sol), 0.), 220.) * 2.2;
+        float d = length(cameraPosition - vP);
+        c = mix(c, horizonte, smoothstep(160., 560., d));
+        gl_FragColor = vec4(c, 1.);
+      }`,
+  }),
+);
+escena.add(oceano);
+
+// Tierra (Yucatán, Cuba, Centroamérica) con relieve suave
+const tierra = new THREE.Mesh(
+  new THREE.PlaneGeometry(ANCHO, ALTO, 360, 360).rotateX(-Math.PI / 2),
+  new THREE.ShaderMaterial({
+    uniforms: { tierra: { value: texTierra }, sol: { value: SOL } },
+    vertexShader: `
+      uniform sampler2D tierra; varying float vL, vIn; varying vec3 vN; varying vec2 vUv;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float ruido(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+      float altura(vec2 uv){ float l = texture2D(tierra, uv).r; float adentro = textureLod(tierra, uv, 4.).r;
+        return mix(-1.2, .12 + adentro*.9*(.55 + .6*ruido(uv*38.)) , smoothstep(.35,.65,l)); }
+      void main(){ vUv = uv; vL = texture2D(tierra, uv).r; vIn = textureLod(tierra, uv, 4.).r;
+        float e = 1./360.; float h = altura(uv);
+        float hx = altura(uv+vec2(e,0.)) - h, hz = altura(uv+vec2(0.,e)) - h;
+        vN = normalize(vec3(-hx*360./${ANCHO.toFixed(2)}, 1., hz*360./100.));
+        vec3 p = position; p.y = h;
+        gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.); }`,
+    fragmentShader: `
+      uniform vec3 sol; varying float vL, vIn; varying vec3 vN; varying vec2 vUv;
+      void main(){ if (vL < .45) discard;
+        vec3 arena = vec3(.80,.72,.55), selva = vec3(.16,.30,.15), seca = vec3(.36,.40,.24);
+        vec3 c = mix(arena, mix(selva, seca, smoothstep(.6,1.,vIn)*.4), smoothstep(.62,.9,vL)*smoothstep(.35,.7,vIn));
+        float luz = .35 + .75*max(dot(normalize(vN), sol), 0.);
+        gl_FragColor = vec4(c*luz, 1.); }`,
+  }),
+);
+tierra.position.y = 0.0;
+escena.add(tierra);
+
+// Sargazo: puntos en GPU; cada punto aparece si su número aleatorio < cobertura del día
+const PUNTOS = 9 * W * H;
+const gPuntos = new THREE.BufferGeometry();
+{
+  const uv = new Float32Array(PUNTOS * 2), rnd = new Float32Array(PUNTOS * 2);
+  for (let i = 0; i < PUNTOS; i++) { uv[2 * i] = Math.random(); uv[2 * i + 1] = Math.random(); rnd[2 * i] = Math.random(); rnd[2 * i + 1] = Math.random(); }
+  gPuntos.setAttribute("position", new THREE.BufferAttribute(new Float32Array(PUNTOS * 3), 3));
+  gPuntos.setAttribute("aUv", new THREE.BufferAttribute(uv, 2));
+  gPuntos.setAttribute("aRnd", new THREE.BufferAttribute(rnd, 2));
+}
+const uDia = { a: { value: 0 }, b: { value: 0 }, f: { value: 0 } };
+const matPuntos = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { obs: { value: texObs }, corr: { value: texCorr }, diaA: uDia.a, diaB: uDia.b, mezcla: uDia.f, tiempo: uTiempo,
+    ancho: { value: ANCHO }, alto: { value: ALTO }, escala: { value: 1 }, pixel: { value: 1 } },
+  vertexShader: `
+    precision highp sampler2DArray;
+    uniform sampler2DArray obs, corr; uniform float diaA, diaB, mezcla, tiempo, ancho, alto, escala, pixel;
+    attribute vec2 aUv, aRnd; varying float vR, vA;
+    void main(){
+      float c = mix(texture(obs, vec3(aUv, diaA)).r, texture(obs, vec3(aUv, diaB)).r, mezcla);
+      float vis = step(aRnd.x, c*1.15);
+      vec2 cor = texture(corr, vec3(aUv, diaA)).rg*2. - 1.;
+      vec2 uv = aUv + cor*.0016*sin(tiempo*.6 + aRnd.y*6.283) + vec2(cor.x, cor.y)*.0010*fract(tiempo*.15 + aRnd.y);
+      vec3 p = vec3((uv.x-.5)*ancho, .06, (.5-uv.y)*alto);
+      vec4 mv = modelViewMatrix*vec4(p,1.);
+      gl_PointSize = vis * escala * pixel * (.5 + aRnd.y*.7) * (.20 / -mv.z);
+      vR = aRnd.y; vA = vis;
+      gl_Position = projectionMatrix*mv; }`,
+  fragmentShader: `
+    varying float vR, vA;
+    void main(){ vec2 q = gl_PointCoord - .5; float d = length(q); if (d > .5 || vA < .5) discard;
+      vec3 oro = vec3(.86,.60,.17), cafe = vec3(.46,.28,.06);
+      vec3 c = mix(oro, cafe, vR) * (1.05 - d*.8);
+      gl_FragColor = vec4(c, smoothstep(.5,.3,d)*.95); }`,
+});
+const sargazo = new THREE.Points(gPuntos, matPuntos);
+sargazo.frustumCulled = false;
+escena.add(sargazo);
+
+// Predicción: capa de calor translúcida con contorno en el umbral de decisión
+const uPred = { value: 0 }, uPredOn = { value: 1 };
+const capaPred = new THREE.Mesh(
+  new THREE.PlaneGeometry(ANCHO, ALTO, 1, 1).rotateX(-Math.PI / 2),
+  new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    uniforms: { pred: { value: texPred }, dia: uPred, activo: uPredOn, tierra: { value: texTierra }, umbral: { value: meta.umbral_modelo }, tiempo: uTiempo },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `
+      precision highp sampler2DArray;
+      uniform sampler2DArray pred; uniform sampler2D tierra; uniform float dia, activo, umbral, tiempo; varying vec2 vUv;
+      void main(){
+        if (activo < .5 || texture2D(tierra, vUv).r > .5) discard;
+        float p = texture(pred, vec3(vUv, dia)).r;
+        vec3 c = mix(vec3(.95,.83,.35), vec3(.89,.35,.20), smoothstep(.45,.95,p));
+        float a = smoothstep(.35,.95,p)*.30;
+        float w = fwidth(p)*1.4; float linea = 1. - smoothstep(0., w, abs(p - umbral));
+        c = mix(c, vec3(1.,.97,.9), linea); a = max(a, linea*.7);
+        if (a < .01) discard;
+        gl_FragColor = vec4(c, a); }`,
+  }),
+);
+capaPred.position.y = 0.04;
+escena.add(capaPred);
+
+// Corrientes: partículas avanzadas en CPU con el campo del día
+const NP = 4500, cola = 0.018;
+const part = new Float32Array(NP * 3); // u, v, edad
+const gCor = new THREE.BufferGeometry();
+const posCor = new Float32Array(NP * 6), colCor = new Float32Array(NP * 8);
+gCor.setAttribute("position", new THREE.BufferAttribute(posCor, 3));
+gCor.setAttribute("color", new THREE.BufferAttribute(colCor, 4));
+const corrientes = new THREE.LineSegments(gCor, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false }));
+corrientes.frustumCulled = false;
+escena.add(corrientes);
+const esTierra = (u, v) => {
+  const x = Math.min(TT - 1, Math.max(0, Math.floor(u * TT))), y = Math.min(TT - 1, Math.max(0, Math.floor(v * TT)));
+  return tierraPx[(y * TT + x) * 4] > 127;
+};
+const nacer = (i) => {
+  let u, v; do { u = Math.random(); v = Math.random(); } while (esTierra(u, v));
+  part[3 * i] = u; part[3 * i + 1] = v; part[3 * i + 2] = Math.random() * 3;
+};
+for (let i = 0; i < NP; i++) nacer(i);
+const velocidad = (u, v, dia) => {
+  const x = u * (WC - 1), y = v * (HC - 1), x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
+  const x1 = Math.min(x0 + 1, WC - 1), y1 = Math.min(y0 + 1, HC - 1);
+  const k = (yy, xx, c) => corrDatos[((dia * HC + yy) * WC + xx) * 2 + c] / 127.5 - 1;
+  const m = (c) => (k(y0, x0, c) * (1 - fx) + k(y0, x1, c) * fx) * (1 - fy) + (k(y1, x0, c) * (1 - fx) + k(y1, x1, c) * fx) * fy;
+  return [m(0) * 1.5, m(1) * 1.5];
+};
+function avanzarCorrientes(dt, dia) {
+  for (let i = 0; i < NP; i++) {
+    let u = part[3 * i], v = part[3 * i + 1];
+    const [vu, vv] = velocidad(u, v, dia);
+    const du = vu * 0.012 * dt / Math.cos(19 * Math.PI / 180), dv = vv * 0.012 * dt;
+    u += du; v += dv; part[3 * i + 2] += dt;
+    if (u < 0 || u > 1 || v < 0 || v > 1 || esTierra(u, v) || part[3 * i + 2] > 4) { nacer(i); u = part[3 * i]; v = part[3 * i + 1]; part[3 * i + 2] = 0; }
+    part[3 * i] = u; part[3 * i + 1] = v;
+    const rap = Math.hypot(vu, vv), edad = part[3 * i + 2];
+    const a = Math.min(1, edad * 2) * Math.min(1, (4 - edad) * 2) * Math.min(.55, .1 + rap * .7);
+    const tu = u - vu * cola, tv = v - vv * cola;
+    posCor.set([(u - .5) * ANCHO, .12, (.5 - v) * ALTO, (tu - .5) * ANCHO, .12, (.5 - tv) * ALTO], i * 6);
+    colCor.set([.9, .95, 1, a, .9, .95, 1, 0], i * 8);
+  }
+  gCor.attributes.position.needsUpdate = true; gCor.attributes.color.needsUpdate = true;
+}
+
+// Etiquetas de tramos de costa
+const capaEtiquetas = document.createElement("div");
+capaEtiquetas.style.cssText = "position:absolute;inset:0;pointer-events:none;overflow:hidden";
+contenedor.append(capaEtiquetas);
+const marcas = meta.tramos.map((t) => {
+  const el = document.createElement("div"); el.className = "etiqueta"; el.textContent = t.nombre.split("–")[0];
+  capaEtiquetas.append(el);
+  return { t, el, p: new THREE.Vector3(lon2x(t.centro[1]) + 0.8, 0.3, lat2z(t.centro[0])) };
+});
+
+// ------------------------------------------------------------------ vistas de cámara
+const VISTAS = [
+  { c: [12, 82, 92], t: [0, 0, 2] },
+  { c: [6, 26, 30], t: [-17, 0, -10] },
+  { c: [-12.5, 3.2, -5.5], t: [-19.5, 0, -12.5] },
+];
+let vuelo = null;
+function irA(i) {
+  vuelo = { desde: [camara.position.clone(), controles.target.clone()], a: [new THREE.Vector3(...VISTAS[i].c), new THREE.Vector3(...VISTAS[i].t)], t: 0 };
+}
+camara.position.set(...VISTAS[1].c); controles.target.set(...VISTAS[1].t);
+["v-caribe", "v-qroo", "v-costa"].forEach((id, i) => document.getElementById(id).addEventListener("click", () => irA(i)));
+
+// ------------------------------------------------------------------ estado y UI
+const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let t = Math.max(0, fechas.indexOf("2025-08-10")), jugando = !reducir, vel = 3, modo = "verif";
+const $ = (id) => document.getElementById(id);
+const rango = $("rango"); rango.max = N - 1;
+const fmt = (f) => new Date(f + "T12:00:00").toLocaleDateString(idioma === "es" ? "es-MX" : "en-US", { day: "numeric", month: "short", year: "numeric" });
+const masDias = (f, d) => { const x = new Date(f + "T12:00:00"); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+
+function pintarMeses() {
+  const ms = []; let ult = "";
+  fechas.forEach((f) => { const m = f.slice(0, 7); if (m !== ult) { ult = m; ms.push(f); } });
+  $("meses").innerHTML = ms.map((f) => `<span>${new Date(f + "T12:00:00").toLocaleDateString(idioma === "es" ? "es-MX" : "en-US", { month: "short" })}</span>`).join("");
+}
+function aplicarIdioma() {
+  document.documentElement.lang = idioma;
+  document.querySelectorAll("[data-i]").forEach((el) => { el.textContent = tx(el.dataset.i); });
+  $("idioma").textContent = idioma === "es" ? "EN" : "ES";
+  $("pasos").innerHTML = tx("pasos").map((p) => `<li>${p}</li>`).join("");
+  $("limites").textContent = tx("limites");
+  ["v-caribe", "v-qroo", "v-costa"].forEach((id, i) => { $(id).textContent = tx("vistas")[i]; });
+  $("play").setAttribute("aria-label", jugando ? tx("pausa") : tx("reproducir"));
+  const g = meta.metricas.prediccion_prueba_2025, u = meta.metricas.unet_prueba;
+  $("m-temp").innerHTML = `
+    <span>${tx("tIou")}</span><span></span>
+    <span>· ${tx("tRed")}</span><span class="v gana">${g.modelo.iou.toFixed(3)}</span>
+    <span>· ${tx("tPers")}</span><span class="v">${g.persistencia.iou.toFixed(3)}</span>
+    <span>· ${tx("tLag")}</span><span class="v">${g.lagrangiano.iou.toFixed(3)}</span>
+    <span>${tx("tUnet")}</span><span class="v">${u.f1.toFixed(3)}</span>`;
+  pintarMeses(); ultimoDia = -1;
+}
+let ultimoDia = -1;
+function actualizarPanel(dia) {
+  if (dia === ultimoDia) return; ultimoDia = dia;
+  const hoy = fechas[dia];
+  const objetivo = modo === "verif" ? hoy : masDias(hoy, 7);
+  const j = idxFecha[objetivo];
+  const info = meta.por_dia[objetivo];
+  const hay = j !== undefined && meta.tiene_pred[j] && info;
+  uPred.value = hay ? j : 0; uPredOn.value = hay && $("c-pred").checked ? 1 : 0;
+  $("t-modo").textContent = modo === "verif" ? tx("modoVerif") : tx("modoPron");
+  $("t-fecha").textContent = modo === "verif" ? fmt(hoy) : `${fmt(hoy)} → ${fmt(objetivo)}`;
+  $("nota-modo").textContent = !hay ? tx("sinPred") : modo === "verif" ? tx("notaVerif")(fmt(info.emitido), fmt(objetivo)) : tx("notaPron")(fmt(hoy), fmt(objetivo));
+  const nivel = (p) => p < 0.25 ? ["--ok", tx("bajo")] : p < 0.5 ? ["--medio", tx("medio")] : ["--alto", tx("alto")];
+  $("tramos").innerHTML = meta.tramos.map((tr) => {
+    const d = hay ? info.tramos[tr.nombre] : null;
+    if (!d) return `<div class="tramo"><i class="luz" style="background:var(--linea)"></i><span class="nombre">${tr.nombre}</span><span class="prob">—</span></div>`;
+    const [col, txt] = nivel(d.prob);
+    return `<div class="tramo"><i class="luz" style="background:var(${col})"></i><span class="nombre">${tr.nombre}</span>
+      <span class="prob">${Math.round(d.prob * 100)}% · ${txt}</span>
+      <span class="barra"><i style="width:${Math.round(d.prob * 100)}%;background:var(${col})"></i></span>
+      <span class="detalle">${tx("observado")} ${fmt(objetivo)}: ${d.obs_presencia ? tx("si") : tx("no")} · ${tx("cobertura")} ${(d.obs * 100).toFixed(1)}%</span></div>`;
+  }).join("");
+  marcas.forEach((m) => {
+    const d = hay ? info.tramos[m.t.nombre] : null;
+    m.el.style.borderLeftColor = d ? `var(${nivel(d.prob)[0]})` : "var(--tenue)";
+  });
+  $("m-dia").innerHTML = hay ? `
+    <span>${tx("emitido")}</span><span class="v">${fmt(info.emitido)}</span>
+    <span>${tx("iouModelo")}</span><span class="v ${info.iou_modelo >= info.iou_persistencia ? "gana" : ""}">${info.iou_modelo.toFixed(2)}</span>
+    <span>${tx("iouPers")}</span><span class="v">${info.iou_persistencia.toFixed(2)}</span>` : `<span>${tx("sinPred")}</span><span></span>`;
+}
+
+$("play").addEventListener("click", () => { jugando = !jugando; $("play").textContent = jugando ? "❚❚" : "▶"; $("play").setAttribute("aria-label", jugando ? tx("pausa") : tx("reproducir")); });
+$("play").textContent = jugando ? "❚❚" : "▶";
+rango.addEventListener("input", () => { t = +rango.value; });
+document.querySelectorAll("#velocidad button").forEach((b) => b.addEventListener("click", () => {
+  vel = +b.dataset.v; document.querySelectorAll("#velocidad button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+}));
+const ponerModo = (m) => { modo = m; $("m-verif").setAttribute("aria-pressed", m === "verif"); $("m-pron").setAttribute("aria-pressed", m === "pron"); ultimoDia = -1; };
+$("m-verif").addEventListener("click", () => ponerModo("verif"));
+$("m-pron").addEventListener("click", () => ponerModo("pron"));
+$("c-obs").addEventListener("change", (e) => { sargazo.visible = e.target.checked; });
+$("c-pred").addEventListener("change", () => { ultimoDia = -1; });
+$("c-cor").addEventListener("change", (e) => { corrientes.visible = e.target.checked; });
+$("idioma").addEventListener("click", () => { idioma = idioma === "es" ? "en" : "es"; aplicarIdioma(); });
+
+function ajustar() {
+  const r = contenedor.getBoundingClientRect();
+  render.setSize(r.width, r.height, false);
+  camara.aspect = r.width / Math.max(r.height, 1); camara.updateProjectionMatrix();
+  matPuntos.uniforms.pixel.value = render.getPixelRatio() * r.height / (2 * Math.tan(THREE.MathUtils.degToRad(camara.fov / 2)));
+}
+new ResizeObserver(ajustar).observe(contenedor);
+ajustar();
+aplicarIdioma();
+$("cargando").classList.add("oculto");
+
+// ------------------------------------------------------------------ bucle
+const reloj = new THREE.Clock();
+const v3 = new THREE.Vector3();
+function cuadro() {
+  const dt = Math.min(reloj.getDelta(), 0.05);
+  uTiempo.value += dt;
+  if (jugando) { t += dt * vel; if (t > N - 1) t = 0; }
+  const a = Math.floor(t), b = Math.min(a + 1, N - 1);
+  uDia.a.value = a; uDia.b.value = b; uDia.f.value = t - a;
+  if (+rango.value !== a) rango.value = a;
+  actualizarPanel(Math.round(t) > N - 1 ? N - 1 : Math.round(t));
+  if (corrientes.visible) avanzarCorrientes(dt * (reducir ? .3 : 1), a);
+  if (vuelo) {
+    vuelo.t = Math.min(1, vuelo.t + dt / 1.6); const e = vuelo.t < .5 ? 2 * vuelo.t * vuelo.t : 1 - Math.pow(-2 * vuelo.t + 2, 2) / 2;
+    camara.position.lerpVectors(vuelo.desde[0], vuelo.a[0], e); controles.target.lerpVectors(vuelo.desde[1], vuelo.a[1], e);
+    if (vuelo.t >= 1) vuelo = null;
+  }
+  controles.update();
+  // de lejos se engrosan un poco los puntos para que las manchas se lean
+  matPuntos.uniforms.escala.value = THREE.MathUtils.clamp(camara.position.distanceTo(controles.target) / 40, 1, 2.2);
+  const r = contenedor.getBoundingClientRect();
+  marcas.forEach((m) => {
+    v3.copy(m.p).project(camara);
+    const vis = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05;
+    m.el.style.display = vis ? "block" : "none";
+    if (vis) { m.el.style.left = `${(v3.x * .5 + .5) * r.width}px`; m.el.style.top = `${(-v3.y * .5 + .5) * r.height}px`; }
+  });
+  render.render(escena, camara);
+  requestAnimationFrame(cuadro);
+}
+cuadro();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# --- Privado: notas personales y de trabajo (no se publican) ---
+CONTEXTO.md
+transcripciones/
+docs/bitacora.md
+docs/01_investigacion_semar.md
+
+# --- Credenciales (nunca) ---
+.env
+.cdsapirc
+*.cdsapirc
+.copernicusmarine/
+*credentials*
+*secret*
+
+# --- Datos pesados (se descargan con scripts/) ---
+data/raw/*
+data/processed/*
+!data/**/.gitkeep
+
+# --- Modelos: solo la ConvLSTM v2 y las métricas ---
+modelos/*
+!modelos/.gitkeep
+!modelos/*_metricas.json
+!modelos/convlstm_v2_sargazo.pt
+
+# --- Renders de prueba antiguos ---
+blender/renders/prueba_f150.png
+blender/renders/prueba2_*.png
+
+*.part
+*.zip
+*.log
+.ipynb_checkpoints/
+__pycache__/
+*.blend1
+
+# El .blend guarda rutas locales; se regenera con blender/escena_arribo.py
+blender/*.blend

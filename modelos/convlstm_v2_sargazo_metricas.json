@@ -1,0 +1,12 @@
+{
+  "nota": "Métricas transcritas del log (el guardado automático falló por un int64; corregido en el script).",
+  "prueba_2025_presencia_7d": {
+    "modelo":       {"iou": 0.199, "f1_tramos": 0.981, "tp": 572, "fp": 21, "fn": 1,   "umbral": 0.75},
+    "persistencia": {"iou": 0.173, "f1_tramos": 0.956, "tp": 538, "fp": 15, "fn": 35,  "umbral": 0.02},
+    "lagrangiano":  {"iou": 0.117, "f1_tramos": 0.807, "tp": 389, "fp": 2,  "fn": 184, "umbral": 0.01}
+  },
+  "windage_lagrangiano": 0.0,
+  "mejor_epoca": 11,
+  "val_iou_mejor": 0.233,
+  "muestras": {"train": 941, "val": 161, "test": 149, "excluidas_atipicos": 59}
+}
