@@ -3,6 +3,7 @@
 **Autor:** Gersain Barrón · [gersadesign.com](https://gersadesign.com)
 
 🌊 **Simulador interactivo:** https://gersainbarron.github.io/sargazo-ia/
+
 📐 **Artículo con toda la matemática:** https://gersadesign.com/lab/sargazo-ia/ ([English](https://gersadesign.com/en/lab/sargazo-ia/))
 
 *English summary below.*
