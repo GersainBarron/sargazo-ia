@@ -85,6 +85,11 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
   #tiempo { grid-row: 2; grid-column: 1; }
   #panel { grid-row: 3; grid-column: 1; border-left: 0; border-top: 1px solid var(--linea); }
 }
+@media (max-width: 560px) {
+  #vistas { top: 74px; left: 16px; right: auto; }
+  .meses { font-size: 10px; gap: 4px; }
+  #velocidad button { padding: 5px 6px; }
+}
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
 </style>
 <script type="importmap">
