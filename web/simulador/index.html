@@ -241,7 +241,7 @@ const TXT = {
     vistas: ["Caribbean", "Quintana Roo", "Coast"], cargando: "LOADING DATA…", pausa: "Pause", reproducir: "Play",
   },
 };
-let idioma = "es";
+let idioma = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "es";
 const tx = (k) => TXT[idioma][k];
 
 // ------------------------------------------------------------------ utilidades de datos
